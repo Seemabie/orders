@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Syed Empire Electronic Cigs Order</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f3f4f6;
+    color: #111827;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .hidden { display: none !important; }
+
+  /* STATION PICKER (FIRST SCREEN) */
+  .station-picker {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(160deg, #0f2b4f 0%, #1e3a8a 50%, #1e40af 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 28px 22px;
+    overflow-y: auto;
+    animation: fadeIn 0.3s ease-out;
+  }
+  .station-picker.hiding { animation: fadeOut 0.25s ease-in forwards; }
+  .station-picker-content {
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    padding: 20px 0;
+  }
+  .station-picker-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    background: rgba(250,204,21,0.2);
+    color: #fde68a;
+    border: 2px solid #facc15;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    margin-bottom: 18px;
+  }
+  .station-picker-title {
+    color: white;
+    font-size: 30px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    letter-spacing: 0.4px;
+    line-height: 1.2;
+  }
+  .station-picker-subtitle {
+    color: #bfdbfe;
+    font-size: 19px;
+    font-weight: 600;
+    margin-bottom: 28px;
+  }
+  .station-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .station-button {
+    width: 100%;
+    padding: 22px 18px;
+    font-size: 19px;
+    font-weight: 800;
+    background: white;
+    color: #0f2b4f;
+    border: 3px solid white;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+    transition: all 0.15s;
+    letter-spacing: 0.4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .station-button .arrow {
+    color: #9ca3af;
+    font-size: 22px;
+    font-weight: 900;
+    transition: all 0.15s;
+  }
+  .station-button:active {
+    transform: scale(0.97);
+    background: #facc15;
+    border-color: #facc15;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .station-button:active .arrow { color: #0f2b4f; }
+
+  .station-picker-footer {
+    margin-top: 26px;
+    font-size: 13px;
+    color: #93c5fd;
+    font-weight: 500;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+  /* MAIN APP */
+  .app { padding-bottom: 140px; }
+
+  /* HEADER */
+  .header {
+    background: #0f2b4f;
+    color: white;
+    padding: 14px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  }
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .station-label-small {
+    font-size: 11px;
+    font-weight: 700;
+    color: #bfdbfe;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    margin-bottom: 3px;
+  }
+  .station-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 0.3px;
+    line-height: 1.15;
+  }
+  .change-station-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 800;
+    background: rgba(255,255,255,0.14);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.45);
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .change-station-btn:active { background: rgba(255,255,255,0.25); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 73px;
+    z-index: 99;
+  }
+  .tab {
+    flex: 1;
+    padding: 16px 8px;
+    text-align: center;
+    font-size: 19px;
+    font-weight: 800;
+    cursor: pointer;
+    border-bottom: 5px solid transparent;
+    color: #6b7280;
+    user-select: none;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+  }
+  .tab.active { border-bottom-color: #0f2b4f; color: #0f2b4f; background: #f9fafb; }
+
+  /* SECTION */
+  .brand-section { margin: 18px 12px; }
+  .section-header {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    color: white;
+    letter-spacing: 0.3px;
+  }
+  .sec-menthol { background: linear-gradient(135deg, #059669, #047857); }
+  .sec-tobacco { background: linear-gradient(135deg, #92400e, #78350f); }
+  .sec-device { background: linear-gradient(135deg, #1e40af, #1e3a8a); }
+  .sec-logic-power { background: linear-gradient(135deg, #b91c1c, #991b1b); }
+  .sec-logic-pro { background: linear-gradient(135deg, #c2410c, #9a3412); }
+
+  /* CARD */
+  .product {
+    background: white;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .product.has-qty {
+    border-color: #0f2b4f;
+    background: #eef4fc;
+    box-shadow: 0 2px 10px rgba(15,43,79,0.15);
+  }
+  .product-info { flex: 1; min-width: 0; }
+  .product-name {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1.25;
+    color: #111827;
+  }
+  .badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    border: 2px solid;
+  }
+  .badge-3 { background: #fef3c7; color: #92400e; border-color: #d97706; }
+  .badge-5 { background: #fee2e2; color: #991b1b; border-color: #dc2626; }
+  .badge-2pk { background: #ccfbf1; color: #115e59; border-color: #0d9488; }
+  .badge-4pk { background: #dbeafe; color: #1e3a8a; border-color: #2563eb; }
+
+  /* QTY CONTROLS */
+  .qty-controls { display: flex; align-items: center; gap: 6px; }
+  .qty-btn {
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    border: none;
+    font-size: 28px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.12s;
+    line-height: 1;
+  }
+  .qty-minus { background: #e5e7eb; color: #374151; }
+  .qty-plus { background: #0f2b4f; color: white; }
+  .qty-btn:active { transform: scale(0.9); }
+  .qty-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .qty-value {
+    min-width: 44px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f2b4f;
+  }
+
+  /* BOTTOM BAR */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 2px solid #e5e7eb;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.1);
+    z-index: 100;
+  }
+  .total-info { font-size: 16px; color: #374151; }
+  .total-info strong { font-size: 26px; color: #0f2b4f; margin-left: 4px; }
+  .submit-btn {
+    padding: 16px 22px;
+    font-size: 19px;
+    font-weight: 800;
+    background: #059669;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(5,150,105,0.35);
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .submit-btn:active { transform: translateY(2px); box-shadow: 0 2px 6px rgba(5,150,105,0.3); }
+  .submit-btn:disabled {
+    background: #d1d5db;
+    color: #6b7280;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 18px 18px 0 0;
+    padding: 24px 22px 22px;
+    max-width: 520px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: slideUp 0.25s ease-out;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal h2 { font-size: 22px; margin-bottom: 10px; color: #0f2b4f; font-weight: 800; }
+  .modal .station-label {
+    font-size: 17px;
+    color: #374151;
+    margin-bottom: 14px;
+  }
+  .modal .station-label strong { color: #0f2b4f; font-size: 18px; }
+
+  .order-list {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    border: 1px solid #e5e7eb;
+  }
+  .order-list-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 16px;
+    gap: 10px;
+    align-items: center;
+  }
+  .order-list-item:last-of-type { border-bottom: none; }
+  .order-list-item .qty-pill {
+    background: #0f2b4f;
+    color: white;
+    padding: 3px 12px;
+    border-radius: 16px;
+    font-weight: 800;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+  .order-list-total {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 12px;
+    margin-top: 4px;
+    border-top: 2px solid #0f2b4f;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f2b4f;
+  }
+
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-btn {
+    flex: 1;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: 800;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+  }
+  .btn-cancel { background: #e5e7eb; color: #374151; }
+  .btn-confirm { background: #059669; color: white; }
+  .btn-danger { background: #dc2626; color: white; }
+  .modal-btn:active { transform: scale(0.98); }
+  .modal-btn:disabled { opacity: 0.6; cursor: wait; }
+
+  .modal-success { text-align: center; padding: 8px 0; }
+  .modal-success .check-circle {
+    width: 88px;
+    height: 88px;
+    background: #059669;
+    border-radius: 50%;
+    margin: 8px auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 52px;
+    font-weight: 900;
+    box-shadow: 0 6px 20px rgba(5,150,105,0.3);
+  }
+  .modal-success h2 { font-size: 26px; margin-bottom: 6px; }
+  .modal-success p { font-size: 17px; color: #4b5563; margin-bottom: 20px; }
+
+  .modal-warning-icon {
+    width: 68px;
+    height: 68px;
+    background: #fef3c7;
+    border: 3px solid #d97706;
+    border-radius: 50%;
+    margin: 4px auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #92400e;
+    font-size: 38px;
+    font-weight: 900;
+  }
+
+  .loading {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255,255,255,0.35);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-banner {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    border: 2px solid #fca5a5;
+  }
+
+  @media (min-width: 640px) {
+    .products-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .product { margin-bottom: 0; }
+    .station-name { font-size: 22px; }
+  }
+
+  @media (min-width: 900px) {
+    .app { max-width: 900px; margin: 0 auto; }
+    .bottom-bar { max-width: 900px; margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- STATION PICKER (mandatory first screen) -->
+<div class="station-picker" id="stationPicker">
+  <div class="station-picker-content">
+    <div class="station-picker-badge">SYED EMPIRE</div>
+    <div class="station-picker-title">Electronic Cigs Order</div>
+    <div class="station-picker-subtitle">Tap your station to begin</div>
+    <div class="station-buttons">
+      <button class="station-button" data-station="ONE STOP AUTO">
+        <span>ONE STOP AUTO</span><span class="arrow">&rsaquo;</span>
+      </button>
+      <button class="station-button" data-station="KSK AUTO GROUP">
+        <span>KSK AUTO GROUP</span><span class="arrow">&rsaquo;</span>
+      </button>
+      <button class="station-button" data-station="220 NORTHERN BLVD">
+        <span>220 NORTHERN BLVD</span><span class="arrow">&rsaquo;</span>
+      </button>
+      <button class="station-button" data-station="NSK AUTO WORKSHOP">
+        <span>NSK AUTO WORKSHOP</span><span class="arrow">&rsaquo;</span>
+      </button>
+      <button class="station-button" data-station="ROCKAWAY ATLANTIC">
+        <span>ROCKAWAY ATLANTIC</span><span class="arrow">&rsaquo;</span>
+      </button>
+    </div>
+    <div class="station-picker-footer">Select carefully. Orders are recorded under your station name.</div>
+  </div>
+</div>
+
+<!-- MAIN APP (hidden until a station is selected) -->
+<div class="app hidden" id="app">
+  <div class="header">
+    <div class="header-content">
+      <div>
+        <div class="station-label-small">Ordering for</div>
+        <div class="station-name" id="currentStation"></div>
+      </div>
+      <button class="change-station-btn" id="changeStationBtn">Change</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-brand="juul">JUUL</div>
+    <div class="tab" data-brand="logic">LOGIC</div>
+  </div>
+
+  <div id="content"></div>
+
+  <div class="bottom-bar">
+    <div class="total-info">Items: <strong id="totalCount">0</strong></div>
+    <button id="reviewBtn" class="submit-btn" disabled>Review &amp; Submit</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+  // ============ CONFIG ============
+  // Paste your Google Apps Script Web App URL here after deploying it.
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6GhAVLJ-wYBopEaMpupGY3JhvRlju12rj8fxq1fca-P5sCxLDgmCsAG7B9toN3vsGQA/exec";
+
+  // ============ CATALOG ============
+  const products = {
+    juul: [
+      { section: "JUUL Device", color: "sec-device", items: [
+        { id: "juul_device", name: "JUUL Device Silver/Black" }
+      ]},
+      { section: "JUUL Menthol Pods", color: "sec-menthol", items: [
+        { id: "juul_menth_3_2", name: "JUUL Menthol", strength: "3%", pack: "2PK" },
+        { id: "juul_menth_3_4", name: "JUUL Menthol", strength: "3%", pack: "4PK" },
+        { id: "juul_menth_5_2", name: "JUUL Menthol", strength: "5%", pack: "2PK" },
+        { id: "juul_menth_5_4", name: "JUUL Menthol", strength: "5%", pack: "4PK" }
+      ]},
+      { section: "JUUL Virginia Tobacco Pods", color: "sec-tobacco", items: [
+        { id: "juul_tob_3_2", name: "JUUL Virginia Tobacco", strength: "3%", pack: "2PK" },
+        { id: "juul_tob_3_4", name: "JUUL Virginia Tobacco", strength: "3%", pack: "4PK" },
+        { id: "juul_tob_5_2", name: "JUUL Virginia Tobacco", strength: "5%", pack: "2PK" },
+        { id: "juul_tob_5_4", name: "JUUL Virginia Tobacco", strength: "5%", pack: "4PK" }
+      ]}
+    ],
+    logic: [
+      { section: "Logic Power Series", color: "sec-logic-power", items: [
+        { id: "logic_pwr_device", name: "Logic Power Device" },
+        { id: "logic_pwr_cart", name: "Logic Power Tobacco Cartridge" }
+      ]},
+      { section: "Logic Pro Series", color: "sec-logic-pro", items: [
+        { id: "logic_pro_device", name: "Logic Pro Device" },
+        { id: "logic_pro_cap", name: "Logic Pro Tobacco Capsule" }
+      ]}
+    ]
+  };
+
+  const quantities = {};
+  let currentBrand = "juul";
+  let selectedStation = null;
+
+  // ============ STATION PICKER LOGIC ============
+  document.querySelectorAll(".station-button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectStation(btn.dataset.station);
+    });
+  });
+
+  function selectStation(station) {
+    selectedStation = station;
+    document.getElementById("currentStation").textContent = station;
+    const picker = document.getElementById("stationPicker");
+    picker.classList.add("hiding");
+    setTimeout(() => {
+      picker.classList.add("hidden");
+      picker.classList.remove("hiding");
+      document.getElementById("app").classList.remove("hidden");
+      window.scrollTo(0, 0);
+    }, 250);
+  }
+
+  document.getElementById("changeStationBtn").addEventListener("click", () => {
+    const totalItems = Object.values(quantities).reduce((a, b) => a + b, 0);
+    if (totalItems > 0) {
+      confirmChangeStation();
+    } else {
+      backToPicker();
+    }
+  });
+
+  function confirmChangeStation() {
+    const content = document.getElementById("modalContent");
+    content.innerHTML =
+      '<div style="text-align:center;">' +
+        '<div class="modal-warning-icon">!</div>' +
+        '<h2 style="text-align:center;">Change Station?</h2>' +
+        '<p style="font-size:16px;color:#4b5563;margin:10px 0 20px;text-align:center;">This will clear your current order. Continue?</p>' +
+      '</div>' +
+      '<div class="modal-actions">' +
+        '<button class="modal-btn btn-cancel" onclick="document.getElementById(\'modal\').classList.remove(\'active\')">Keep Order</button>' +
+        '<button class="modal-btn btn-danger" id="confirmChangeBtn">Change Station</button>' +
+      '</div>';
+    document.getElementById("modal").classList.add("active");
+    document.getElementById("confirmChangeBtn").onclick = () => {
+      document.getElementById("modal").classList.remove("active");
+      backToPicker();
+    };
+  }
+
+  function backToPicker() {
+    Object.keys(quantities).forEach(k => delete quantities[k]);
+    selectedStation = null;
+    document.getElementById("app").classList.add("hidden");
+    document.getElementById("stationPicker").classList.remove("hidden");
+    currentBrand = "juul";
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelector('.tab[data-brand="juul"]').classList.add("active");
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  // ============ PRODUCT RENDER ============
+  function render() {
+    const content = document.getElementById("content");
+    content.innerHTML = "";
+
+    products[currentBrand].forEach(section => {
+      const secEl = document.createElement("div");
+      secEl.className = "brand-section";
+
+      const header = document.createElement("div");
+      header.className = "section-header " + section.color;
+      header.textContent = section.section;
+      secEl.appendChild(header);
+
+      const grid = document.createElement("div");
+      grid.className = "products-grid";
+
+      section.items.forEach(item => {
+        const qty = quantities[item.id] || 0;
+        const card = document.createElement("div");
+        card.className = "product" + (qty > 0 ? " has-qty" : "");
+
+        const badges = [];
+        if (item.strength) {
+          const cls = item.strength === "3%" ? "badge-3" : "badge-5";
+          badges.push('<span class="badge ' + cls + '">' + item.strength + '</span>');
+        }
+        if (item.pack) {
+          const cls = item.pack === "2PK" ? "badge-2pk" : "badge-4pk";
+          badges.push('<span class="badge ' + cls + '">' + item.pack + '</span>');
+        }
+
+        card.innerHTML =
+          '<div class="product-info">' +
+            '<div class="product-name">' + item.name + '</div>' +
+            (badges.length ? '<div class="badges">' + badges.join("") + '</div>' : "") +
+          '</div>' +
+          '<div class="qty-controls">' +
+            '<button class="qty-btn qty-minus" data-id="' + item.id + '" data-action="minus"' + (qty === 0 ? " disabled" : "") + '>\u2212</button>' +
+            '<div class="qty-value">' + qty + '</div>' +
+            '<button class="qty-btn qty-plus" data-id="' + item.id + '" data-action="plus">+</button>' +
+          '</div>';
+
+        grid.appendChild(card);
+      });
+
+      secEl.appendChild(grid);
+      content.appendChild(secEl);
+    });
+
+    updateTotals();
+  }
+
+  function updateTotals() {
+    const total = Object.values(quantities).reduce((a, b) => a + b, 0);
+    document.getElementById("totalCount").textContent = total;
+    document.getElementById("reviewBtn").disabled = total === 0 || !selectedStation;
+  }
+
+  document.getElementById("content").addEventListener("click", e => {
+    const btn = e.target.closest(".qty-btn");
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    quantities[id] = quantities[id] || 0;
+    if (action === "plus") quantities[id]++;
+    else if (action === "minus" && quantities[id] > 0) quantities[id]--;
+    if (quantities[id] === 0) delete quantities[id];
+    render();
+  });
+
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      currentBrand = tab.dataset.brand;
+      render();
+    });
+  });
+
+  function getOrderedItems() {
+    const out = [];
+    [...products.juul, ...products.logic].forEach(section => {
+      section.items.forEach(item => {
+        if (quantities[item.id]) {
+          let label = item.name;
+          if (item.strength) label += " " + item.strength;
+          if (item.pack) label += " " + item.pack;
+          out.push({ label: label, qty: quantities[item.id] });
+        }
+      });
+    });
+    return out;
+  }
+
+  document.getElementById("reviewBtn").addEventListener("click", () => {
+    if (!selectedStation) return;
+    const items = getOrderedItems();
+    const total = items.reduce((a, b) => a + b.qty, 0);
+
+    const content = document.getElementById("modalContent");
+    content.innerHTML =
+      '<h2>Review Your Order</h2>' +
+      '<div class="station-label">Station: <strong>' + selectedStation + '</strong></div>' +
+      '<div class="order-list">' +
+        items.map(i =>
+          '<div class="order-list-item"><span>' + i.label + '</span><span class="qty-pill">\u00D7 ' + i.qty + '</span></div>'
+        ).join("") +
+        '<div class="order-list-total"><span>Total Items</span><span>' + total + '</span></div>' +
+      '</div>' +
+      '<div class="modal-actions">' +
+        '<button class="modal-btn btn-cancel" id="cancelBtn">Go Back</button>' +
+        '<button class="modal-btn btn-confirm" id="confirmBtn">Submit Order</button>' +
+      '</div>';
+
+    document.getElementById("modal").classList.add("active");
+    document.getElementById("cancelBtn").onclick = () => document.getElementById("modal").classList.remove("active");
+    document.getElementById("confirmBtn").onclick = submitOrder;
+  });
+
+  async function submitOrder() {
+    const btn = document.getElementById("confirmBtn");
+    const cancel = document.getElementById("cancelBtn");
+    btn.innerHTML = '<span class="loading"></span>Sending';
+    btn.disabled = true;
+    cancel.disabled = true;
+
+    const items = getOrderedItems();
+    const payload = {
+      station: selectedStation,
+      timestamp: new Date().toISOString(),
+      items: items.map(i => ({ product: i.label, quantity: i.qty }))
+    };
+
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("PASTE_YOUR") !== -1) {
+      setTimeout(() => showSuccess(selectedStation, true), 600);
+      return;
+    }
+
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      showSuccess(selectedStation, false);
+    } catch (err) {
+      btn.innerHTML = "Submit Order";
+      btn.disabled = false;
+      cancel.disabled = false;
+      const existing = document.querySelector(".error-banner");
+      if (existing) existing.remove();
+      const banner = document.createElement("div");
+      banner.className = "error-banner";
+      banner.textContent = "Could not send. Check internet and try again.";
+      document.getElementById("modalContent").prepend(banner);
+    }
+  }
+
+  function showSuccess(station, demo) {
+    const content = document.getElementById("modalContent");
+    content.innerHTML =
+      '<div class="modal-success">' +
+        '<div class="check-circle">\u2713</div>' +
+        '<h2>Order Sent</h2>' +
+        '<p>Your order for <strong>' + station + '</strong> has been submitted.' +
+        (demo ? '<br><br><em style="color:#92400e;font-size:14px;">Demo mode: connect the Google Apps Script URL to save to your sheet.</em>' : '') +
+        '</p>' +
+        '<div class="modal-actions">' +
+          '<button class="modal-btn btn-cancel" onclick="closeSuccessAndReset()">Change Station</button>' +
+          '<button class="modal-btn btn-confirm" onclick="newOrderSameStation()">New Order</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function newOrderSameStation() {
+    Object.keys(quantities).forEach(k => delete quantities[k]);
+    document.getElementById("modal").classList.remove("active");
+    currentBrand = "juul";
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelector('.tab[data-brand="juul"]').classList.add("active");
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  function closeSuccessAndReset() {
+    document.getElementById("modal").classList.remove("active");
+    backToPicker();
+  }
+
+  render();
+</script>
+</body>
+</html>
